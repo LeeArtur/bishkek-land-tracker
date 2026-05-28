@@ -1,13 +1,18 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 from db.models import Base, create_tables
 from db.seed import seed_districts
 
 
 @pytest.fixture
 def engine():
-    e = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    e = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     create_tables(e)
     return e
 
