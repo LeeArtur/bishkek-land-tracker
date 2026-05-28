@@ -35,6 +35,66 @@ def test_parse_html_extracts_district_from_address():
     assert r.district_name == "Бишкек"
 
 
+def test_parse_html_handles_sotok_plural():
+    """Area '8 соток' (most common form for quantities > 4) must be extracted."""
+    html = """<html><body>
+    <div class="listing">
+      <div class="main-wrapper">
+        <div class="right-info">
+          <div class="top-info">
+            <div class="left-side">
+              <p class="title">
+                <a href="/details/testid-sotok-plural">Участок, 8 соток, Ленинский район</a>
+              </p>
+              <div class="address">Ленинский, ул. Тестовая</div>
+            </div>
+            <div class="right-side">
+              <div class="listing-prices-block">
+                <div class="sep main">
+                  <div class="price">$ 12 000</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </body></html>"""
+    results = _parse_html(html)
+    assert len(results) == 1
+    assert results[0].area_sotka == 8.0
+
+
+def test_parse_html_handles_sotok_plural_decimal():
+    """Area '12 соток' must also be extracted correctly."""
+    html = """<html><body>
+    <div class="listing">
+      <div class="main-wrapper">
+        <div class="right-info">
+          <div class="top-info">
+            <div class="left-side">
+              <p class="title">
+                <a href="/details/testid-sotok-12">Участок, 12 соток, Октябрьский район</a>
+              </p>
+              <div class="address">Октябрьский, ул. Тестовая</div>
+            </div>
+            <div class="right-side">
+              <div class="listing-prices-block">
+                <div class="sep main">
+                  <div class="price">$ 20 000</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </body></html>"""
+    results = _parse_html(html)
+    assert len(results) == 1
+    assert results[0].area_sotka == 12.0
+
+
 def test_parse_html_skips_listings_without_price():
     # Build minimal HTML with a listing card that has no parseable price
     html = """<html><body>

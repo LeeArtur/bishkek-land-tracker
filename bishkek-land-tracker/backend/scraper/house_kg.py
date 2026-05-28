@@ -17,7 +17,7 @@ PRICE_SELECTOR = ".sep.main .price"    # main price: <div class="price">$ 295 00
 ADDRESS_SELECTOR = "div.address"       # location: <div class="address">Бишкек, ...</div>
 
 # Area is embedded in the title text: "Участок, 4.5 сотки" — no dedicated element
-_AREA_RE = re.compile(r"([\d]+[.,]?[\d]*)\s*со(?:тк|т\.)", re.IGNORECASE)
+_AREA_RE = re.compile(r"([\d]+[.,]?[\d]*)\s*со(?:тк|ток|т\.)", re.IGNORECASE)
 _AREA_GA_RE = re.compile(r"([\d]+[.,]?[\d]*)\s*га", re.IGNORECASE)
 
 
