@@ -15,8 +15,12 @@ def _get_or_create_district(db: Session, name: str) -> District:
 
 
 def upsert_listing(db: Session, raw: ListingRaw, today: date) -> None:
+    """Upsert one listing. Does NOT commit — caller owns the transaction."""
+    if raw.price_usd is None or raw.area_sotka is None or raw.area_sotka <= 0:
+        return
+
     district = _get_or_create_district(db, raw.district_name)
-    price_per_sotka = (raw.price_usd / raw.area_sotka) if (raw.area_sotka and raw.area_sotka > 0) else 0.0
+    price_per_sotka = raw.price_usd / raw.area_sotka
 
     existing = db.query(Listing).filter_by(external_id=raw.external_id).first()
 
@@ -58,10 +62,9 @@ def upsert_listing(db: Session, raw: ListingRaw, today: date) -> None:
                 change_pct=change_pct,
             ))
 
-    db.commit()
-
 
 def mark_inactive(db: Session, seen_external_ids: set, today: date) -> None:
+    """Mark active listings absent from seen_external_ids as inactive."""
     active = db.query(Listing).filter_by(is_active=True).all()
     for listing in active:
         if listing.external_id not in seen_external_ids:
@@ -70,6 +73,7 @@ def mark_inactive(db: Session, seen_external_ids: set, today: date) -> None:
 
 
 def recalculate_districts(db: Session) -> None:
+    """Recalculate avg, median, count for all districts from active listings."""
     districts = db.query(District).all()
     for district in districts:
         prices = [
@@ -82,6 +86,8 @@ def recalculate_districts(db: Session) -> None:
             district.median_price_per_sotka = statistics.median(prices)
             district.listing_count = len(prices)
         else:
+            district.avg_price_per_sotka = None
+            district.median_price_per_sotka = None
             district.listing_count = 0
     db.commit()
 
@@ -89,11 +95,14 @@ def recalculate_districts(db: Session) -> None:
 def run_scrape(db: Session, scrapers: list) -> dict:
     """
     scrapers: list of (name: str, fn: () -> list[ListingRaw])
-    Returns dict of {source_name: {count, error}}
+    Only marks listings inactive for sources that succeeded (failed scrapers
+    don't pollute seen_ids, preventing accidental de-listing).
+    Returns dict of {source_name: {count, error}}.
     """
     today = date.today()
     seen_external_ids: set = set()
     results = {}
+    failed_sources: set = set()
 
     for name, scraper_fn in scrapers:
         try:
@@ -101,9 +110,21 @@ def run_scrape(db: Session, scrapers: list) -> dict:
             for raw in raw_listings:
                 upsert_listing(db, raw, today)
                 seen_external_ids.add(raw.external_id)
+            db.commit()
             results[name] = {"count": len(raw_listings), "error": None}
         except Exception as e:
+            db.rollback()
+            failed_sources.add(name)
             results[name] = {"count": 0, "error": str(e)}
+
+    if failed_sources:
+        # Don't mark inactive for listings belonging to failed scrapers,
+        # to avoid de-listing valid inventory due to a transient scraper error.
+        failed_ids = {
+            l.external_id
+            for l in db.query(Listing).filter(Listing.source.in_(failed_sources)).all()
+        }
+        seen_external_ids |= failed_ids
 
     mark_inactive(db, seen_external_ids, today)
     recalculate_districts(db)
