@@ -4,13 +4,14 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./backend:/app
       - ./backend/data:/app/data
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
+    # NOTE: Frontend service requires Task 14 (Vite scaffold) to be complete before building.
+    # Comment this out until frontend/ has a Dockerfile and package.json.
     build: ./frontend
     ports:
       - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:8000
     command: npm run dev -- --host
