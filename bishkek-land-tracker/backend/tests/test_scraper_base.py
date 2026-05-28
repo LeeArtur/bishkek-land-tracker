@@ -32,3 +32,7 @@ def test_parse_area_sotka_ga():
 
 def test_parse_area_sotka_none_on_garbage():
     assert parse_area_sotka("площадь не указана") is None
+
+
+def test_parse_price_usd_usd_suffix():
+    assert parse_price_usd("15000 USD") == 15000.0

@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass
 from datetime import date
+from typing import Optional
 
 
 @dataclass
@@ -9,8 +10,8 @@ class ListingRaw:
     source: str           # "house.kg" | "lalafo" | "stroka" | "stroika"
     title: str
     district_name: str    # matched against districts table by name
-    area_sotka: float
-    price_usd: float
+    area_sotka: Optional[float]
+    price_usd: Optional[float]
     url: str
     scraped_at: date
 
