@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from sqlalchemy import String, Integer, Float, Boolean, Date, ForeignKey
+from sqlalchemy import String, Integer, Float, Boolean, Date, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -34,7 +34,7 @@ class Listing(Base):
     url: Mapped[str] = mapped_column(String, nullable=False)
     first_seen: Mapped[date] = mapped_column(Date, nullable=False)
     last_seen: Mapped[date] = mapped_column(Date, nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     district: Mapped["District"] = relationship(back_populates="listings")
     history: Mapped[list["PriceHistory"]] = relationship(back_populates="listing")
@@ -55,6 +55,7 @@ class PriceHistory(Base):
 
 class MacroData(Base):
     __tablename__ = "macro_data"
+    __table_args__ = (UniqueConstraint("recorded_at", "source", name="uq_macro_date_source"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     recorded_at: Mapped[date] = mapped_column(Date, nullable=False)
