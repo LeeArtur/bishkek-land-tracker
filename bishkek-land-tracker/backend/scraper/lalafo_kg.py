@@ -126,15 +126,18 @@ async def _scrape_async() -> list[ListingRaw]:
         )
         page = await context.new_page()
         page_num = 1
-        while True:
+        max_pages = 50
+        while page_num <= max_pages:
             url = SEARCH_URL.format(page=page_num)
-            # Cloudflare may present a JS challenge — networkidle waits for it to complete
-            await page.goto(url, wait_until="networkidle", timeout=60000)
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            # Give React SPA and Cloudflare challenge time to render
+            await page.wait_for_timeout(3000)
             html = await page.content()
             listings = _parse_html(html)
             if not listings:
                 break
             results.extend(listings)
+            print(f"lalafo.kg page {page_num}: +{len(listings)} listings ({len(results)} total)")
             page_num += 1
             await asyncio.sleep(2.0)
         await browser.close()

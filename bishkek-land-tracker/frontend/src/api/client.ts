@@ -1,6 +1,8 @@
 import type { District, Listing, PriceHistoryEntry, TrendPoint, Deal, MacroData, Filters } from '../types'
 
-const BASE = '/api'
+// In production VITE_API_URL points to Render backend (e.g. https://bishkek-land-tracker-api.onrender.com)
+// In dev, /api is proxied to localhost:8000 by Vite
+const BASE = import.meta.env.VITE_API_URL ?? '/api'
 
 async function get<T>(path: string, params?: Record<string, string | number | boolean | null | undefined>): Promise<T> {
   const url = new URL(BASE + path, window.location.origin)
@@ -9,7 +11,8 @@ async function get<T>(path: string, params?: Record<string, string | number | bo
       if (v !== null && v !== undefined) url.searchParams.set(k, String(v))
     })
   }
-  const res = await fetch(url.pathname + url.search)
+  const fullUrl = BASE.startsWith('http') ? BASE + path + url.search : url.pathname + url.search
+  const res = await fetch(fullUrl)
   if (!res.ok) throw new Error(`API ${res.status}: ${path}`)
   return res.json()
 }
@@ -39,5 +42,5 @@ export const api = {
   getMacro: () => get<MacroData | null>('/macro'),
 
   triggerScrape: () =>
-    fetch(BASE + '/scrape', { method: 'POST' }).then(r => r.json()),
+    fetch((import.meta.env.VITE_API_URL ?? '/api') + '/scrape', { method: 'POST' }).then(r => r.json()),
 }

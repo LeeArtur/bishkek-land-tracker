@@ -152,13 +152,14 @@ async def _scrape_async() -> list[ListingRaw]:
         page_num = 1
         ad_urls: list[str] = []
 
-        while True:
+        max_pages = 30
+        while page_num <= max_pages:
             url = SEARCH_URL + (f"?page={page_num}" if page_num > 1 else "")
-            await search_page.goto(url, wait_until="networkidle", timeout=60000)
+            await search_page.goto(url, wait_until="domcontentloaded", timeout=20000)
 
             # Wait for at least one ad card link to appear
             try:
-                await search_page.wait_for_selector(AD_LINK_SELECTOR, timeout=15000)
+                await search_page.wait_for_selector(AD_LINK_SELECTOR, timeout=10000)
             except Exception:
                 break  # No more pages
 

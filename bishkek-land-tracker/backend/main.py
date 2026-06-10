@@ -1,29 +1,27 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import sessionmaker
 from db.session import get_engine
 from db.seed import seed_districts
-from scheduler import start_scheduler
+from sqlalchemy.orm import sessionmaker
 from api import districts, listings, trends, recommendations, macro, scrape
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     engine = get_engine()
-    SessionLocal = sessionmaker(bind=engine)
-    with SessionLocal() as db:
+    with sessionmaker(bind=engine)() as db:
         seed_districts(db)
-    scheduler = start_scheduler()
     yield
-    scheduler.shutdown()
 
 
 app = FastAPI(title="Bishkek Land Tracker", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

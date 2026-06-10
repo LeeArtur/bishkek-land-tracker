@@ -1,37 +1,36 @@
 import asyncio
 import re
 from datetime import date
+import httpx
 from bs4 import BeautifulSoup
-from playwright.async_api import async_playwright
-from scraper.base import ListingRaw, parse_price_usd, parse_area_sotka
+from scraper.base import ListingRaw, parse_price_usd
 
 BASE_URL = "https://house.kg"
-# Bishkek land plots: city=1 filters to Bishkek region, page={page} for pagination
-SEARCH_URL = "https://house.kg/kupit-uchastok?city=1&page={page}"
+# Bishkek land plots with красная книга (document=6), Chui region (region=1), Bishkek city (town=2)
+SEARCH_URL = "https://house.kg/kupit-uchastok?region=1&town=2&document=6&sort_by=upped_at+desc&page={page}"
 SOURCE = "house.kg"
+MAX_PAGES = 50
+CONCURRENCY = 8  # parallel page fetches
 
-# Selectors discovered by inspecting https://house.kg/kupit-uchastok (2026-05-28)
-CARD_SELECTOR = "div.listing"          # container: <div itemscope ... class="listing">
-TITLE_LINK_SELECTOR = "p.title a"      # <a href="/details/...">Участок, 4.5 сотки</a>
-PRICE_SELECTOR = ".sep.main .price"    # main price: <div class="price">$ 295 000</div>
-ADDRESS_SELECTOR = "div.address"       # location: <div class="address">Бишкек, ...</div>
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml",
+    "Accept-Language": "ru-RU,ru;q=0.9",
+}
 
-# Area is embedded in the title text: "Участок, 4.5 сотки" — no dedicated element
 _AREA_RE = re.compile(r"([\d]+[.,]?[\d]*)\s*со(?:тк|ток|т\.)", re.IGNORECASE)
 _AREA_GA_RE = re.compile(r"([\d]+[.,]?[\d]*)\s*га", re.IGNORECASE)
 
 
 def _extract_listing_id(href: str) -> str | None:
-    """Extract unique ID from href like /details/106097169fcac6736b7f0-59663491."""
     match = re.search(r"/details/([^/?#]+)", href)
     return match.group(1) if match else None
 
 
 def _parse_area_from_title(title_text: str) -> float | None:
-    """
-    Parse area from listing title like 'Участок, 4.5 сотки' or 'Участок, 0.2 га'.
-    Falls back to None if not found.
-    """
     sotka_match = _AREA_RE.search(title_text)
     if sotka_match:
         return float(sotka_match.group(1).replace(",", "."))
@@ -46,13 +45,13 @@ def _parse_html(html: str) -> list[ListingRaw]:
     results = []
     today = date.today()
 
-    for card in soup.select(CARD_SELECTOR):
+    for card in soup.select("div.listing"):
         try:
-            link_el = card.select_one(TITLE_LINK_SELECTOR)
-            price_el = card.select_one(PRICE_SELECTOR)
-            address_el = card.select_one(ADDRESS_SELECTOR)
+            link_el = card.select_one("p.title a")
+            price_el = card.select_one(".sep.main .price")
+            address_el = card.select_one("div.address")
 
-            if not all([link_el, price_el]):
+            if not link_el or not price_el:
                 continue
 
             href = link_el.get("href", "")
@@ -61,11 +60,8 @@ def _parse_html(html: str) -> list[ListingRaw]:
                 continue
 
             title_text = link_el.get_text(strip=True)
-            price_text = price_el.get_text(strip=True)
-            # Price format: "$ 295 000" — strip the per-sotka suffix if present
-            price_main = price_text.split("/")[0].strip()
+            price_main = price_el.get_text(strip=True).split("/")[0].strip()
             price = parse_price_usd(price_main)
-
             if price is None:
                 continue
 
@@ -73,11 +69,12 @@ def _parse_html(html: str) -> list[ListingRaw]:
 
             district_name = "Другой"
             if address_el:
-                # Address format: "Бишкек, Матросова, переулок Елецкий"
-                # Strip the map-marker icon text and whitespace
                 addr_text = address_el.get_text(strip=True)
-                # First token before comma is typically city/district
-                district_name = addr_text.split(",")[0].strip() or "Другой"
+                parts = [p.strip() for p in addr_text.split(",")]
+                if len(parts) >= 2 and parts[0].lower() in ("бишкек", "bishkek"):
+                    district_name = parts[1] or "Бишкек"
+                elif parts:
+                    district_name = parts[0] or "Другой"
 
             full_url = BASE_URL + href if href.startswith("/") else href
 
@@ -97,31 +94,52 @@ def _parse_html(html: str) -> list[ListingRaw]:
     return results
 
 
+async def _fetch_page(client: httpx.AsyncClient, page_num: int) -> list[ListingRaw]:
+    url = SEARCH_URL.format(page=page_num)
+    r = await client.get(url, timeout=15)
+    r.raise_for_status()
+    return _parse_html(r.text)
+
+
 async def _scrape_async() -> list[ListingRaw]:
-    results = []
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"
-            ),
-            locale="ru-RU",
-        )
-        page = await context.new_page()
-        page_num = 1
-        while True:
-            url = SEARCH_URL.format(page=page_num)
-            await page.goto(url, wait_until="networkidle", timeout=30000)
-            html = await page.content()
-            listings = _parse_html(html)
-            if not listings:
+    # Step 1: fetch page 1 to check how many pages exist
+    async with httpx.AsyncClient(headers=HEADERS, follow_redirects=True) as client:
+        first_page = await _fetch_page(client, 1)
+        if not first_page:
+            return []
+
+        results = list(first_page)
+        print(f"house.kg page 1: +{len(first_page)} listings ({len(results)} total)")
+
+        # Step 2: fetch remaining pages in parallel batches
+        semaphore = asyncio.Semaphore(CONCURRENCY)
+
+        async def fetch_with_sem(page_num: int) -> tuple[int, list[ListingRaw]]:
+            async with semaphore:
+                listings = await _fetch_page(client, page_num)
+                return page_num, listings
+
+        page_num = 2
+        while page_num <= MAX_PAGES:
+            batch = range(page_num, min(page_num + CONCURRENCY, MAX_PAGES + 1))
+            tasks = [fetch_with_sem(p) for p in batch]
+            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            got_any = False
+            for item in sorted(batch_results, key=lambda x: x[0] if isinstance(x, tuple) else 0):
+                if isinstance(item, Exception):
+                    continue
+                p, listings = item
+                if not listings:
+                    continue
+                got_any = True
+                results.extend(listings)
+                print(f"house.kg page {p}: +{len(listings)} listings ({len(results)} total)")
+
+            if not got_any:
                 break
-            results.extend(listings)
-            page_num += 1
-            await asyncio.sleep(1.5)
-        await browser.close()
+            page_num += len(batch)
+
     return results
 
 

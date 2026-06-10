@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: bishkek-land-tracker-api
+    runtime: python
+    rootDir: bishkek-land-tracker/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+    autoDeploy: true

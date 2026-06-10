@@ -4,6 +4,18 @@ from sqlalchemy.orm import Session
 from db.models import District, Listing, PriceHistory
 from scraper.base import ListingRaw
 
+# Regions outside Bishkek + Chui — skip listings from these areas
+_EXCLUDED_REGIONS = {
+    "иссык-кульская", "ошская", "джалал-абадская",
+    "нарынская", "баткенская", "таласская",
+    "иссык-куль", "ош", "джалал-абад", "нарын", "баткен", "талас",
+}
+
+def _is_bishkek_or_chui(district_name: str) -> bool:
+    """Return False if the address clearly points to another region."""
+    lower = district_name.lower()
+    return not any(excl in lower for excl in _EXCLUDED_REGIONS)
+
 
 def _get_or_create_district(db: Session, name: str) -> District:
     district = db.query(District).filter_by(name=name).first()
@@ -50,6 +62,7 @@ def upsert_listing(db: Session, raw: ListingRaw, today: date) -> None:
     else:
         existing.last_seen = today
         existing.is_active = True
+        existing.district_id = district.id
         if existing.current_price_usd != raw.price_usd:
             change_pct = ((raw.price_usd - existing.current_price_usd) / existing.current_price_usd) * 100
             existing.current_price_usd = raw.price_usd
@@ -107,11 +120,12 @@ def run_scrape(db: Session, scrapers: list) -> dict:
     for name, scraper_fn in scrapers:
         try:
             raw_listings = scraper_fn()
-            for raw in raw_listings:
+            filtered = [r for r in raw_listings if _is_bishkek_or_chui(r.district_name)]
+            for raw in filtered:
                 upsert_listing(db, raw, today)
                 seen_external_ids.add(raw.external_id)
             db.commit()
-            results[name] = {"count": len(raw_listings), "error": None}
+            results[name] = {"count": len(filtered), "skipped": len(raw_listings) - len(filtered), "error": None}
         except Exception as e:
             db.rollback()
             failed_sources.add(name)

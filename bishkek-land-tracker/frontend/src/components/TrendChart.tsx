@@ -19,15 +19,23 @@ export function TrendChart() {
 
   useEffect(() => {
     api.getTrends(period).then((points: TrendPoint[]) => {
+      // Count samples per district, keep top 5
+      const sampleCount: Record<string, number> = {}
+      points.forEach(p => { sampleCount[p.district_name] = (sampleCount[p.district_name] ?? 0) + p.sample_count })
+      const top5 = Object.entries(sampleCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([name]) => name)
+      const top5Set = new Set(top5)
+
       const byDate: Record<string, ChartRow> = {}
-      const dSet = new Set<string>()
       points.forEach(p => {
+        if (!top5Set.has(p.district_name)) return
         if (!byDate[p.date]) byDate[p.date] = { date: p.date }
         byDate[p.date][p.district_name] = p.median_price_per_sotka
-        dSet.add(p.district_name)
       })
       setRows(Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date)))
-      setDistricts([...dSet])
+      setDistricts(top5)
     })
   }, [period])
 

@@ -1,0 +1,37 @@
+name: Nightly Scrape
+
+on:
+  schedule:
+    - cron: '0 20 * * *'  # 03:00 Bishkek time (UTC+6) = 21:00 UTC, using 20:00 UTC as buffer
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bishkek-land-tracker/backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: bishkek-land-tracker/backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install chromium --with-deps
+
+      - name: Run scraper
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -c "
+from scheduler import run_nightly_scrape
+result = run_nightly_scrape()
+print('Result:', result)
+"

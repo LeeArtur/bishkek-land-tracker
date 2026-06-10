@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from db.session import get_db
 from db.models import Listing, District
-from config import DEAL_THRESHOLD
+from config import DEAL_THRESHOLD, is_residential
 
 router = APIRouter()
 
@@ -14,6 +14,10 @@ def get_recommendations(db: Session = Depends(get_db)):
 
     deals = []
     for l in listings:
+        if not is_residential(l.title or ""):
+            continue
+        if l.area_sotka and l.area_sotka > 50:
+            continue
         district = districts.get(l.district_id)
         if not district or not district.median_price_per_sotka:
             continue
