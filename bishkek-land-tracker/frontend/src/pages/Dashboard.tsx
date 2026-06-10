@@ -30,11 +30,11 @@ export function Dashboard() {
       </div>
       <SummaryCards />
       <Filters />
-      <div className="flex gap-4">
-        <div className="min-w-0" style={{ flex: 2 }}>
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="min-w-0 lg:flex-[2]">
           <TrendChart />
         </div>
-        <div className="min-w-0" style={{ flex: 1 }}>
+        <div className="min-w-0 lg:flex-[1]">
           <DealsPanel limit={3} />
         </div>
       </div>

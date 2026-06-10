@@ -13,7 +13,7 @@ function StatCard({ label, value, sub, accent }: {
   label: string; value: string; sub: string; accent: string
 }) {
   return (
-    <div className={`bg-gray-900 rounded-xl p-4 border-l-4 ${accent} flex-1 min-w-[160px]`}>
+    <div className={`bg-gray-900 rounded-xl p-4 border-l-4 ${accent} flex-1 min-w-[140px]`}>
       <div className="text-xs text-gray-500 mb-1">{label}</div>
       <div className="text-2xl font-bold text-white">{value}</div>
       <div className="text-xs text-gray-400 mt-1">{sub}</div>
@@ -42,13 +42,13 @@ export function SummaryCards() {
   }, [])
 
   if (!stats) return (
-    <div className="flex gap-3 flex-wrap">
-      {[1,2,3,4].map(i => <div key={i} className="flex-1 h-20 bg-gray-800 rounded-xl animate-pulse min-w-[160px]" />)}
+    <div className="grid grid-cols-2 sm:flex gap-3 flex-wrap">
+      {[1,2,3,4].map(i => <div key={i} className="flex-1 h-20 bg-gray-800 rounded-xl animate-pulse min-w-[140px]" />)}
     </div>
   )
 
   return (
-    <div className="flex gap-3 flex-wrap">
+    <div className="grid grid-cols-2 sm:flex gap-3 flex-wrap">
       <StatCard label="Всего объявлений" value={stats.totalListings.toLocaleString()} sub="активных" accent="border-blue-500" />
       <StatCard label="Средняя цена / сотка" value={`$${stats.avgPricePerSotka.toLocaleString()}`} sub="по всем районам" accent="border-yellow-400" />
       <StatCard label="Снижение цен сегодня" value={String(stats.priceDropsToday)} sub="объявлений снизили цену" accent="border-green-400" />

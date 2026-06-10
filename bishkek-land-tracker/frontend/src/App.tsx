@@ -22,7 +22,7 @@ export default function App() {
     <FilterProvider>
       <div className="min-h-screen bg-gray-950 text-white">
         <Nav active={page} onNavigate={(p) => setPage(p as Page)} />
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
           {content[page]}
         </main>
       </div>
