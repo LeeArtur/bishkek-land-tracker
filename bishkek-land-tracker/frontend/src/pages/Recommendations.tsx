@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { api } from '../api/client'
 import type { Deal } from '../types'
+
+type SortKey = 'last_seen' | 'discount_pct'
 
 function DealCard({ deal }: { deal: Deal }) {
   return (
@@ -33,7 +35,9 @@ function DealCard({ deal }: { deal: Deal }) {
         </div>
       </div>
 
-      <div className="mt-3 text-xs text-green-500 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="text-xs text-gray-700 mt-2">{deal.last_seen}</div>
+
+      <div className="mt-2 text-xs text-green-500 opacity-0 group-hover:opacity-100 transition-opacity">
         Открыть объявление →
       </div>
     </a>
@@ -43,20 +47,46 @@ function DealCard({ deal }: { deal: Deal }) {
 export function Recommendations() {
   const [deals, setDeals] = useState<Deal[]>([])
   const [loading, setLoading] = useState(true)
+  const [sortKey, setSortKey] = useState<SortKey>('last_seen')
 
   useEffect(() => {
     api.getRecommendations().then(d => { setDeals(d); setLoading(false) })
   }, [])
 
+  const sorted = useMemo(() => {
+    return [...deals].sort((a, b) => {
+      if (sortKey === 'discount_pct') return b.discount_pct - a.discount_pct
+      return b.last_seen.localeCompare(a.last_seen)
+    })
+  }, [deals, sortKey])
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <div className="text-sm text-gray-400">
           Участки с красной книгой, цена/сотка на 15%+ ниже медианы района
         </div>
-        {!loading && (
-          <div className="text-xs text-gray-600">{deals.length} объявлений</div>
-        )}
+        <div className="flex items-center gap-3">
+          {!loading && <div className="text-xs text-gray-600">{deals.length} объявлений</div>}
+          <div className="flex gap-1">
+            <button
+              onClick={() => setSortKey('last_seen')}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
+                sortKey === 'last_seen' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              Новые
+            </button>
+            <button
+              onClick={() => setSortKey('discount_pct')}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
+                sortKey === 'discount_pct' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              Выгодные
+            </button>
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -69,7 +99,7 @@ export function Recommendations() {
         <div className="text-center py-16 text-gray-600">Нет данных</div>
       ) : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {deals.map(deal => <DealCard key={deal.id} deal={deal} />)}
+          {sorted.map(deal => <DealCard key={deal.id} deal={deal} />)}
         </div>
       )}
     </div>
