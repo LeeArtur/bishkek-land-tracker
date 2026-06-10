@@ -1,0 +1,103 @@
+<h2>Секция 1: Архитектура системы</h2>
+<p class="subtitle">Поток данных от парсинга до дашборда</p>
+
+<div class="section">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:stretch;">
+
+    <!-- Block 1: Sources -->
+    <div style="flex:1;min-width:140px;background:#1e2a3a;border:1px solid #2d4a6a;border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:8px;">🌐</div>
+      <h3 style="margin:0 0 8px;font-size:14px;color:#7eb8f7;">Источники данных</h3>
+      <div style="font-size:12px;color:#aaa;line-height:1.8;">
+        house.kg<br>lalafo.kg
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;font-size:20px;color:#555;">→</div>
+
+    <!-- Block 2: Scraper -->
+    <div style="flex:1;min-width:140px;background:#1e2a3a;border:1px solid #2d6a4a;border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:8px;">🕷️</div>
+      <h3 style="margin:0 0 8px;font-size:14px;color:#7ef7b8;">Парсер</h3>
+      <div style="font-size:12px;color:#aaa;line-height:1.8;">
+        Python + Playwright<br>
+        <span style="color:#555;">Запуск: каждую ночь</span><br>
+        APScheduler / cron
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;font-size:20px;color:#555;">→</div>
+
+    <!-- Block 3: DB -->
+    <div style="flex:1;min-width:140px;background:#1e2a3a;border:1px solid #6a5a2d;border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:8px;">🗄️</div>
+      <h3 style="margin:0 0 8px;font-size:14px;color:#f7e07e;">База данных</h3>
+      <div style="font-size:12px;color:#aaa;line-height:1.8;">
+        SQLite<br>
+        listings<br>
+        price_history<br>
+        districts
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;font-size:20px;color:#555;">→</div>
+
+    <!-- Block 4: API -->
+    <div style="flex:1;min-width:140px;background:#1e2a3a;border:1px solid #6a2d6a;border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:8px;">⚡</div>
+      <h3 style="margin:0 0 8px;font-size:14px;color:#f07ef7;">FastAPI</h3>
+      <div style="font-size:12px;color:#aaa;line-height:1.8;">
+        REST API<br>
+        /listings<br>
+        /trends<br>
+        /recommendations
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;font-size:20px;color:#555;">→</div>
+
+    <!-- Block 5: Frontend -->
+    <div style="flex:1;min-width:140px;background:#1e2a3a;border:1px solid #2d4a6a;border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:8px;">📊</div>
+      <h3 style="margin:0 0 8px;font-size:14px;color:#7eb8f7;">React Dashboard</h3>
+      <div style="font-size:12px;color:#aaa;line-height:1.8;">
+        Recharts (графики)<br>
+        Tailwind CSS<br>
+        Фильтры по районам
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>Структура проекта</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;background:#111;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;color:#aaa;line-height:2;">
+      <span style="color:#7eb8f7;">bishkek-land-tracker/</span><br>
+      &nbsp;&nbsp;<span style="color:#7ef7b8;">backend/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;scraper/ &nbsp;<span style="color:#555;"># парсеры</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;api/ &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;"># FastAPI роуты</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;db/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;"># модели SQLite</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;scheduler.py<br>
+      &nbsp;&nbsp;<span style="color:#f7e07e;">frontend/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;src/components/<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;src/pages/<br>
+      &nbsp;&nbsp;<span style="color:#555;">docker-compose.yml</span>
+    </div>
+    <div style="flex:2;min-width:200px;">
+      <div style="background:#1a2a1a;border-radius:8px;padding:14px;font-size:13px;line-height:1.9;border-left:3px solid #7ef7b8;">
+        <strong style="color:#7ef7b8;">Парсер (ночной запуск):</strong><br>
+        1. Playwright открывает house.kg + lalafo.kg<br>
+        2. Собирает объявления по фильтру "Бишкек, земельные участки"<br>
+        3. Для каждого объявления: ID, цена, площадь, район, адрес, дата<br>
+        4. Сравнивает с предыдущими данными → фиксирует изменения цен<br>
+        5. Вычисляет цену за сотку, среднюю по району
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:20px;padding:12px;background:#1a1a2a;border-radius:8px;">
+  <p style="color:#aaa;margin:0;font-size:13px;">✅ Это архитектура выглядит правильно? Напиши в терминале, переходим к макету дашборда.</p>
+</div>

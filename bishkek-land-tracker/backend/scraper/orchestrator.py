@@ -48,6 +48,7 @@ def upsert_listing(db: Session, raw: ListingRaw, today: date) -> None:
             url=raw.url,
             first_seen=today,
             last_seen=today,
+            published_at=raw.published_at,
             is_active=True,
         )
         db.add(listing)
@@ -63,6 +64,8 @@ def upsert_listing(db: Session, raw: ListingRaw, today: date) -> None:
         existing.last_seen = today
         existing.is_active = True
         existing.district_id = district.id
+        if raw.published_at and not existing.published_at:
+            existing.published_at = raw.published_at
         if existing.current_price_usd != raw.price_usd:
             change_pct = ((raw.price_usd - existing.current_price_usd) / existing.current_price_usd) * 100
             existing.current_price_usd = raw.price_usd

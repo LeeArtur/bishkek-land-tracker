@@ -40,6 +40,7 @@ def get_recommendations(db: Session = Depends(get_db)):
                 "discount_pct": discount_pct,
                 "url": l.url,
                 "last_seen": str(l.last_seen),
+                "published_at": str(l.published_at) if l.published_at else None,
             })
 
     return sorted(deals, key=lambda d: d["discount_pct"], reverse=True)

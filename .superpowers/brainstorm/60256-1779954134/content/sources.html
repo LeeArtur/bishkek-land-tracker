@@ -1,0 +1,83 @@
+<h2>Источники данных — расширенный список</h2>
+<p class="subtitle">Источники разбиты по типу — это важно, т.к. способ интеграции разный</p>
+
+<div class="section">
+  <h3 style="color:#7ef7b8;">🕷️ Категория 1: Объявления (парсинг страниц)</h3>
+  <p style="font-size:13px;color:#aaa;">Playwright собирает объявления напрямую — цена, площадь, район, дата</p>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="color:#555;text-align:left;border-bottom:1px solid #222;">
+      <th style="padding:8px;">Источник</th><th style="padding:8px;">URL</th><th style="padding:8px;">Статус</th>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">house.kg</td><td style="padding:8px;color:#7eb8f7;">house.kg</td>
+      <td style="padding:8px;"><span style="background:#1a3a1a;color:#7ef7b8;border-radius:4px;padding:2px 8px;">✅ уже включён</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">lalafo.kg</td><td style="padding:8px;color:#7eb8f7;">lalafo.kg/kyrgyzstan/zemelnye-uchastki</td>
+      <td style="padding:8px;"><span style="background:#1a3a1a;color:#7ef7b8;border-radius:4px;padding:2px 8px;">✅ уже включён</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">stroka.kg</td><td style="padding:8px;color:#7eb8f7;">stroka.kg</td>
+      <td style="padding:8px;"><span style="background:#1a2a3a;color:#7eb8f7;border-radius:4px;padding:2px 8px;">➕ добавить</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">stroika.kg</td><td style="padding:8px;color:#7eb8f7;">stroika.kg</td>
+      <td style="padding:8px;"><span style="background:#1a2a3a;color:#7eb8f7;border-radius:4px;padding:2px 8px;">➕ добавить</span></td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3 style="color:#f7e07e;">📊 Категория 2: Контекстные данные (API / отчёты)</h3>
+  <p style="font-size:13px;color:#aaa;">Не объявления, а макроданные — курс валют, инфляция, ипотечные ставки. Обогащают аналитику.</p>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="color:#555;text-align:left;border-bottom:1px solid #222;">
+      <th style="padding:8px;">Источник</th><th style="padding:8px;">Что даёт</th><th style="padding:8px;">Способ</th>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">NBKR (nbkr.kg)</td>
+      <td style="padding:8px;color:#aaa;">Курс USD/KGS, ипотечные ставки</td>
+      <td style="padding:8px;"><span style="background:#2a2a1a;color:#f7e07e;border-radius:4px;padding:2px 8px;">API / XML</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">NSC (stat.gov.kg)</td>
+      <td style="padding:8px;color:#aaa;">Статистика рынка недвижимости, инфляция</td>
+      <td style="padding:8px;"><span style="background:#2a2a1a;color:#f7e07e;border-radius:4px;padding:2px 8px;">PDF / ручная загрузка</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">bishkek.opendata.kg</td>
+      <td style="padding:8px;color:#aaa;">Открытые данные города</td>
+      <td style="padding:8px;"><span style="background:#2a2a1a;color:#f7e07e;border-radius:4px;padding:2px 8px;">API (если есть)</span></td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3 style="color:#f07ef7;">🏛️ Категория 3: Реестры (сложный доступ)</h3>
+  <p style="font-size:13px;color:#aaa;">Государственные данные — важны для верификации, но обычно закрыты или требуют авторизации</p>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;">Gosregister (gosreg.gov.kg)</td>
+      <td style="padding:8px;color:#aaa;">Кадастр, права собственности</td>
+      <td style="padding:8px;"><span style="background:#2a1a2a;color:#f07ef7;border-radius:4px;padding:2px 8px;">⚠️ Закрытый, нет API</span></td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3 style="color:#888;">❌ Категория 4: Вне скоупа</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="border-bottom:1px solid #1a1a1a;">
+      <td style="padding:8px;color:#555;">Salam Aleykum Real Estate</td>
+      <td style="padding:8px;color:#555;">Нет URL — невозможно интегрировать</td>
+    </tr>
+    <tr>
+      <td style="padding:8px;color:#555;">Osh Real Estate</td>
+      <td style="padding:8px;color:#555;">Ош, не Бишкек — вне скоупа проекта</td>
+    </tr>
+  </table>
+</div>
+
+<div style="text-align:center;margin-top:16px;padding:12px;background:#1a1a2a;border-radius:8px;">
+  <p style="color:#aaa;margin:0;font-size:13px;">Согласен с такой классификацией? Или хочешь добавить/убрать что-то?</p>
+</div>

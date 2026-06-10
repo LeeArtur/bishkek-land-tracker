@@ -34,6 +34,7 @@ class Listing(Base):
     url: Mapped[str] = mapped_column(String, nullable=False)
     first_seen: Mapped[date] = mapped_column(Date, nullable=False)
     last_seen: Mapped[date] = mapped_column(Date, nullable=False)
+    published_at: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     district: Mapped["District"] = relationship(back_populates="listings")

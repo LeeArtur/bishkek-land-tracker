@@ -1,0 +1,94 @@
+<h2>Секция 3: Данные и логика рекомендаций</h2>
+<p class="subtitle">Схема БД и как вычисляются рекомендации</p>
+
+<div class="section">
+  <h3>🗄️ Схема базы данных (SQLite)</h3>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;">
+
+    <div style="flex:1;min-width:200px;background:#0f1923;border:1px solid #2d4a6a;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;">
+      <div style="color:#7eb8f7;font-weight:bold;margin-bottom:8px;font-size:13px;">listings</div>
+      <div style="color:#7ef7b8;">id</div><div style="color:#555;margin-left:8px;font-size:11px;">INTEGER PRIMARY KEY</div>
+      <div style="color:#aaa;">external_id</div><div style="color:#555;margin-left:8px;font-size:11px;">TEXT UNIQUE (ID с сайта)</div>
+      <div style="color:#aaa;">source</div><div style="color:#555;margin-left:8px;font-size:11px;">TEXT (house.kg / lalafo / ...)</div>
+      <div style="color:#aaa;">title</div><div style="color:#555;margin-left:8px;font-size:11px;">TEXT</div>
+      <div style="color:#aaa;">district_id</div><div style="color:#555;margin-left:8px;font-size:11px;">INTEGER → districts</div>
+      <div style="color:#aaa;">area_sotka</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL (площадь в сотках)</div>
+      <div style="color:#aaa;">current_price_usd</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL</div>
+      <div style="color:#aaa;">price_per_sotka</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL (вычисляется)</div>
+      <div style="color:#aaa;">url</div><div style="color:#555;margin-left:8px;font-size:11px;">TEXT</div>
+      <div style="color:#aaa;">first_seen</div><div style="color:#555;margin-left:8px;font-size:11px;">DATE</div>
+      <div style="color:#aaa;">last_seen</div><div style="color:#555;margin-left:8px;font-size:11px;">DATE</div>
+      <div style="color:#aaa;">is_active</div><div style="color:#555;margin-left:8px;font-size:11px;">BOOLEAN (ещё на сайте?)</div>
+    </div>
+
+    <div style="flex:1;min-width:200px;background:#0f1923;border:1px solid #6a5a2d;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;">
+      <div style="color:#f7e07e;font-weight:bold;margin-bottom:8px;font-size:13px;">price_history</div>
+      <div style="color:#7ef7b8;">id</div><div style="color:#555;margin-left:8px;font-size:11px;">INTEGER PRIMARY KEY</div>
+      <div style="color:#aaa;">listing_id</div><div style="color:#555;margin-left:8px;font-size:11px;">INTEGER → listings</div>
+      <div style="color:#aaa;">price_usd</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL</div>
+      <div style="color:#aaa;">price_per_sotka</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL</div>
+      <div style="color:#aaa;">recorded_at</div><div style="color:#555;margin-left:8px;font-size:11px;">DATE</div>
+      <div style="color:#aaa;">change_pct</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL (% от предыдущей)</div>
+      <br>
+      <div style="color:#f7e07e;font-weight:bold;margin-bottom:8px;font-size:13px;">districts</div>
+      <div style="color:#7ef7b8;">id</div><div style="color:#555;margin-left:8px;font-size:11px;">INTEGER PRIMARY KEY</div>
+      <div style="color:#aaa;">name</div><div style="color:#555;margin-left:8px;font-size:11px;">TEXT (Октябрьский, ...)</div>
+      <div style="color:#aaa;">avg_price_per_sotka</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL (пересчитывается ночью)</div>
+      <div style="color:#aaa;">listing_count</div><div style="color:#555;margin-left:8px;font-size:11px;">INTEGER</div>
+    </div>
+
+    <div style="flex:1;min-width:200px;background:#0f1923;border:1px solid #2d6a4a;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;">
+      <div style="color:#7ef7b8;font-weight:bold;margin-bottom:8px;font-size:13px;">macro_data</div>
+      <div style="color:#7ef7b8;">id</div><div style="color:#555;margin-left:8px;font-size:11px;">INTEGER PRIMARY KEY</div>
+      <div style="color:#aaa;">recorded_at</div><div style="color:#555;margin-left:8px;font-size:11px;">DATE</div>
+      <div style="color:#aaa;">usd_kgs_rate</div><div style="color:#555;margin-left:8px;font-size:11px;">REAL (курс NBKR)</div>
+      <div style="color:#aaa;">source</div><div style="color:#555;margin-left:8px;font-size:11px;">TEXT (nbkr / opendata)</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>⭐ Логика рекомендаций</h3>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;">
+
+    <div style="flex:1;min-width:220px;background:#0d1a0d;border:1px solid #2d6a4a;border-radius:8px;padding:14px;">
+      <div style="color:#7ef7b8;font-weight:bold;margin-bottom:8px;">💰 Выгодная сделка</div>
+      <div style="font-size:12px;color:#aaa;line-height:1.9;">
+        Объявление помечается как "выгодное" если:<br>
+        <code style="color:#f7e07e;background:#0f1923;padding:2px 6px;border-radius:4px;font-size:11px;">price_per_sotka &lt; district_avg × 0.85</code><br><br>
+        т.е. цена за сотку на 15%+ ниже средней по району.<br><br>
+        Порог 15% можно настраивать в конфиге.
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:220px;background:#1a1a0d;border:1px solid #6a5a2d;border-radius:8px;padding:14px;">
+      <div style="color:#f7e07e;font-weight:bold;margin-bottom:8px;">📉 Тренд по районам</div>
+      <div style="font-size:12px;color:#aaa;line-height:1.9;">
+        Каждую ночь после парсинга:<br>
+        1. Берём все активные объявления по району<br>
+        2. Считаем медианную цену/сотка за день<br>
+        3. Записываем в <code style="color:#f7e07e;background:#0f1923;padding:2px 4px;border-radius:4px;font-size:11px;">price_history</code><br>
+        4. API отдаёт историю за 30/90/365 дней<br><br>
+        Медиана устойчивее среднего к выбросам.
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:220px;background:#1a0d0d;border:1px solid #6a2d2d;border-radius:8px;padding:14px;">
+      <div style="color:#f07e7e;font-weight:bold;margin-bottom:8px;">🔔 Снижение цены</div>
+      <div style="font-size:12px;color:#aaa;line-height:1.9;">
+        При каждом парсинге сравниваем<br>
+        новую цену с предыдущей.<br>
+        Если изменилась — пишем запись<br>
+        в <code style="color:#f7e07e;background:#0f1923;padding:2px 4px;border-radius:4px;font-size:11px;">price_history</code> с <code style="color:#f7e07e;background:#0f1923;padding:2px 4px;border-radius:4px;font-size:11px;">change_pct</code>.<br><br>
+        Дашборд показывает объявления<br>
+        с изменением цены за сегодня.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:16px;padding:12px;background:#1a1a2a;border-radius:8px;">
+  <p style="color:#aaa;margin:0;font-size:13px;">Дизайн данных выглядит правильно? Если да — запишем спек и перейдём к плану реализации.</p>
+</div>

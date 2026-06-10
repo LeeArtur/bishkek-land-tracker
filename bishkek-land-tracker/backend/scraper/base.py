@@ -1,6 +1,6 @@
 import re
-from dataclasses import dataclass
-from datetime import date
+from dataclasses import dataclass, field
+from datetime import date, timedelta
 from typing import Optional
 
 
@@ -14,6 +14,29 @@ class ListingRaw:
     price_usd: Optional[float]
     url: str
     scraped_at: date
+    published_at: Optional[date] = field(default=None)
+
+
+def parse_relative_date(text: str, today: date) -> Optional[date]:
+    """
+    Parse Russian relative date like '2 дня назад', '1 час назад', '3 месяца назад'.
+    Returns an approximate absolute date.
+    """
+    text = text.lower().strip()
+    num_match = re.search(r'(\d+)', text)
+    n = int(num_match.group(1)) if num_match else 1
+
+    if 'час' in text or 'минут' in text or 'секунд' in text:
+        return today
+    if 'день' in text or 'дня' in text or 'дней' in text:
+        return today - timedelta(days=n)
+    if 'недел' in text:
+        return today - timedelta(weeks=n)
+    if 'месяц' in text or 'месяца' in text or 'месяцев' in text:
+        return today - timedelta(days=n * 30)
+    if 'год' in text or 'года' in text or 'лет' in text:
+        return today - timedelta(days=n * 365)
+    return None
 
 
 def parse_price_usd(text: str, usd_kgs_rate: float = 87.0) -> float | None:

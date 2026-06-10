@@ -35,7 +35,7 @@ function DealCard({ deal }: { deal: Deal }) {
         </div>
       </div>
 
-      <div className="text-xs text-gray-700 mt-2">{deal.last_seen}</div>
+      <div className="text-xs text-gray-600 mt-2">{deal.published_at ?? deal.last_seen}</div>
 
       <div className="mt-2 text-xs text-green-500 opacity-0 group-hover:opacity-100 transition-opacity">
         Открыть объявление →
@@ -56,7 +56,10 @@ export function Recommendations() {
   const sorted = useMemo(() => {
     return [...deals].sort((a, b) => {
       if (sortKey === 'discount_pct') return b.discount_pct - a.discount_pct
-      return b.last_seen.localeCompare(a.last_seen)
+      // Sort by published_at (actual listing date), fallback to last_seen
+      const da = a.published_at ?? a.last_seen
+      const db = b.published_at ?? b.last_seen
+      return db.localeCompare(da)
     })
   }, [deals, sortKey])
 

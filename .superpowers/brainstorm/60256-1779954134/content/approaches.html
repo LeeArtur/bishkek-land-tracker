@@ -1,0 +1,92 @@
+<h2>Варианты архитектуры</h2>
+<p class="subtitle">Выбери подход, который лучше всего подходит под твои цели</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Streamlit / Plotly Dash — All-in-one Python</h3>
+      <p><strong>Стек:</strong> Python · Playwright/BeautifulSoup · SQLite · Streamlit или Dash</p>
+      <p><strong>Как работает:</strong> Весь стек — один Python-проект. Парсер собирает данные, кладёт в SQLite, Streamlit строит дашборд прямо из базы. Никакого отдельного фронтенда.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Плюсы</h4>
+          <ul>
+            <li>Самый быстрый старт (2-3 дня)</li>
+            <li>Один язык, один проект</li>
+            <li>Встроенные графики (Plotly)</li>
+            <li>Легко деплоить локально</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Минусы</h4>
+          <ul>
+            <li>Ограниченная кастомизация UI</li>
+            <li>Менее гибкий дашборд</li>
+            <li>Медленнее при сложных фильтрах</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#888;">Лучше всего если хочешь быстро запустить и не заморачиваться с фронтом</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>FastAPI + React — Классический стек ⭐ Рекомендую</h3>
+      <p><strong>Стек:</strong> Python · Playwright · SQLite/PostgreSQL · FastAPI · React + Recharts</p>
+      <p><strong>Как работает:</strong> Python-парсер + FastAPI отдают REST API. React-фронтенд строит красивый дашборд с картой районов, графиками трендов, фильтрами. Cron запускает парсинг каждую ночь.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Плюсы</h4>
+          <ul>
+            <li>Полная свобода дизайна UI</li>
+            <li>Быстрый и отзывчивый интерфейс</li>
+            <li>Легко добавлять фичи позже</li>
+            <li>Стандартный Production-ready подход</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Минусы</h4>
+          <ul>
+            <li>Нужно знать React (или учиться)</li>
+            <li>4-7 дней до рабочего MVP</li>
+            <li>Два отдельных сервиса</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#888;">Лучший баланс гибкости и скорости для личного инструмента</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Next.js Full-Stack — Один JS-проект</h3>
+      <p><strong>Стек:</strong> Node.js · Puppeteer/Playwright · SQLite (Prisma) · Next.js · Tailwind · Recharts</p>
+      <p><strong>Как работает:</strong> Next.js API Routes обрабатывают парсинг и данные. Фронт и бэк в одном репозитории. Cron через node-cron или Vercel Cron.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Плюсы</h4>
+          <ul>
+            <li>Один язык (TypeScript везде)</li>
+            <li>Современный стек, легко деплоить на Vercel</li>
+            <li>Server Components — быстрый рендеринг</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Минусы</h4>
+          <ul>
+            <li>Парсинг на JS сложнее чем на Python</li>
+            <li>Puppeteer тяжелее Playwright для Python</li>
+            <li>Нет экосистемы pandas/numpy для аналитики</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#888;">Хорош если уже знаешь JS/React и хочешь один монорепо</p>
+    </div>
+  </div>
+
+</div>

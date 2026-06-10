@@ -1,0 +1,195 @@
+<h2>Секция 2: Макет дашборда</h2>
+<p class="subtitle">Wireframe — расположение блоков, не финальный дизайн</p>
+
+<div class="mockup" style="max-width:900px;margin:0 auto;">
+  <div class="mockup-header">📊 Bishkek Land Tracker — Dashboard</div>
+  <div class="mockup-body" style="padding:0;">
+
+    <!-- Nav bar -->
+    <div style="background:#0f1923;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e2d3d;">
+      <div style="display:flex;gap:16px;font-size:12px;">
+        <span style="color:#7eb8f7;border-bottom:2px solid #7eb8f7;padding-bottom:4px;">📊 Дашборд</span>
+        <span style="color:#555;">📋 Все объявления</span>
+        <span style="color:#555;">📈 Тренды</span>
+        <span style="color:#555;">⭐ Рекомендации</span>
+      </div>
+      <div style="font-size:11px;color:#555;">Обновлено: сегодня 03:00 &nbsp; <span style="background:#1a3a1a;color:#7ef7b8;border-radius:4px;padding:2px 8px;cursor:pointer;">🔄 Обновить</span></div>
+    </div>
+
+    <!-- Summary cards -->
+    <div style="display:flex;gap:12px;padding:14px;background:#0d1520;">
+      <div style="flex:1;background:#131f2e;border-radius:8px;padding:12px;border-left:3px solid #7eb8f7;">
+        <div style="font-size:11px;color:#555;margin-bottom:4px;">Всего объявлений</div>
+        <div style="font-size:22px;font-weight:bold;color:#fff;">1 284</div>
+        <div style="font-size:11px;color:#7ef7b8;">↑ +47 за неделю</div>
+      </div>
+      <div style="flex:1;background:#131f2e;border-radius:8px;padding:12px;border-left:3px solid #f7e07e;">
+        <div style="font-size:11px;color:#555;margin-bottom:4px;">Средняя цена / сотка</div>
+        <div style="font-size:22px;font-weight:bold;color:#fff;">$1 820</div>
+        <div style="font-size:11px;color:#f07e7e;">↓ -3.2% за месяц</div>
+      </div>
+      <div style="flex:1;background:#131f2e;border-radius:8px;padding:12px;border-left:3px solid #7ef7b8;">
+        <div style="font-size:11px;color:#555;margin-bottom:4px;">Снижение цен сегодня</div>
+        <div style="font-size:22px;font-weight:bold;color:#fff;">23</div>
+        <div style="font-size:11px;color:#aaa;">объявления снизили цену</div>
+      </div>
+      <div style="flex:1;background:#131f2e;border-radius:8px;padding:12px;border-left:3px solid #f07ef7;">
+        <div style="font-size:11px;color:#555;margin-bottom:4px;">Выгодных сделок</div>
+        <div style="font-size:22px;font-weight:bold;color:#fff;">18</div>
+        <div style="font-size:11px;color:#aaa;">ниже среднего на 15%+</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div style="padding:0 14px 14px;background:#0d1520;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:11px;color:#555;">Фильтры:</span>
+      <select style="background:#1a2a3a;border:1px solid #2d4a6a;color:#aaa;border-radius:6px;padding:5px 10px;font-size:12px;">
+        <option>Все районы</option>
+        <option>Октябрьский</option>
+        <option>Ленинский</option>
+        <option>Свердловский</option>
+      </select>
+      <select style="background:#1a2a3a;border:1px solid #2d4a6a;color:#aaa;border-radius:6px;padding:5px 10px;font-size:12px;">
+        <option>Все источники</option>
+        <option>house.kg</option>
+        <option>lalafo.kg</option>
+        <option>stroka.kg</option>
+        <option>stroika.kg</option>
+      </select>
+      <input style="background:#1a2a3a;border:1px solid #2d4a6a;color:#aaa;border-radius:6px;padding:5px 10px;font-size:12px;width:120px;" placeholder="Цена от $">
+      <input style="background:#1a2a3a;border:1px solid #2d4a6a;color:#aaa;border-radius:6px;padding:5px 10px;font-size:12px;width:120px;" placeholder="Цена до $">
+      <input style="background:#1a2a3a;border:1px solid #2d4a6a;color:#aaa;border-radius:6px;padding:5px 10px;font-size:12px;width:100px;" placeholder="Соток от">
+    </div>
+
+    <!-- Main content: Chart + Deals -->
+    <div style="display:flex;gap:0;padding:0 14px 14px;background:#0d1520;gap:14px;">
+
+      <!-- Chart -->
+      <div style="flex:2;background:#131f2e;border-radius:8px;padding:14px;">
+        <div style="font-size:13px;color:#aaa;margin-bottom:10px;display:flex;justify-content:space-between;">
+          <span>📈 Тренд средней цены / сотка по районам</span>
+          <select style="background:#0d1520;border:1px solid #1e2d3d;color:#555;border-radius:4px;padding:2px 6px;font-size:11px;">
+            <option>30 дней</option><option>90 дней</option><option>1 год</option>
+          </select>
+        </div>
+        <!-- Fake SVG chart -->
+        <svg width="100%" height="160" viewBox="0 0 400 160" style="display:block;">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7eb8f7" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#7eb8f7" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="40" x2="400" y2="40" stroke="#1e2d3d" stroke-width="1"/>
+          <line x1="0" y1="80" x2="400" y2="80" stroke="#1e2d3d" stroke-width="1"/>
+          <line x1="0" y1="120" x2="400" y2="120" stroke="#1e2d3d" stroke-width="1"/>
+          <!-- Labels -->
+          <text x="2" y="38" fill="#333" font-size="9">$2200</text>
+          <text x="2" y="78" fill="#333" font-size="9">$1900</text>
+          <text x="2" y="118" fill="#333" font-size="9">$1600</text>
+          <!-- Line 1: Октябрьский -->
+          <polyline points="30,50 80,45 130,55 180,48 230,42 280,38 330,40 380,36"
+            fill="none" stroke="#7eb8f7" stroke-width="2"/>
+          <!-- Line 2: Ленинский -->
+          <polyline points="30,80 80,85 130,78 180,90 230,88 280,82 330,85 380,80"
+            fill="none" stroke="#7ef7b8" stroke-width="2"/>
+          <!-- Line 3: Свердловский -->
+          <polyline points="30,110 80,105 130,108 180,100 230,95 280,98 330,92 380,90"
+            fill="none" stroke="#f7e07e" stroke-width="2"/>
+          <!-- X labels -->
+          <text x="30" y="155" fill="#333" font-size="9">1 апр</text>
+          <text x="130" y="155" fill="#333" font-size="9">11 апр</text>
+          <text x="230" y="155" fill="#333" font-size="9">21 апр</text>
+          <text x="330" y="155" fill="#333" font-size="9">1 май</text>
+        </svg>
+        <div style="display:flex;gap:16px;margin-top:6px;">
+          <span style="font-size:11px;color:#7eb8f7;">● Октябрьский</span>
+          <span style="font-size:11px;color:#7ef7b8;">● Ленинский</span>
+          <span style="font-size:11px;color:#f7e07e;">● Свердловский</span>
+        </div>
+      </div>
+
+      <!-- Deals sidebar -->
+      <div style="flex:1;background:#131f2e;border-radius:8px;padding:14px;">
+        <div style="font-size:13px;color:#aaa;margin-bottom:10px;">⭐ Выгодные сделки</div>
+        <div style="font-size:11px;color:#555;margin-bottom:10px;">Ниже средней цены района на 15%+</div>
+
+        <div style="background:#0d1a0d;border-radius:6px;padding:10px;margin-bottom:8px;border-left:2px solid #7ef7b8;">
+          <div style="font-size:12px;color:#fff;margin-bottom:3px;">Ленинский р-н, 8 соток</div>
+          <div style="font-size:16px;font-weight:bold;color:#7ef7b8;">$12 000</div>
+          <div style="font-size:11px;color:#555;">$1 500/сотка · среднее $1 820</div>
+          <div style="font-size:10px;color:#7ef7b8;margin-top:4px;">-17.6% от среднего · house.kg</div>
+        </div>
+
+        <div style="background:#0d1a0d;border-radius:6px;padding:10px;margin-bottom:8px;border-left:2px solid #7ef7b8;">
+          <div style="font-size:12px;color:#fff;margin-bottom:3px;">Свердловский р-н, 12 соток</div>
+          <div style="font-size:16px;font-weight:bold;color:#7ef7b8;">$19 200</div>
+          <div style="font-size:11px;color:#555;">$1 600/сотка · среднее $1 950</div>
+          <div style="font-size:10px;color:#7ef7b8;margin-top:4px;">-18.0% от среднего · lalafo.kg</div>
+        </div>
+
+        <div style="background:#0d1a0d;border-radius:6px;padding:10px;border-left:2px solid #7ef7b8;">
+          <div style="font-size:12px;color:#fff;margin-bottom:3px;">Октябрьский р-н, 6 соток</div>
+          <div style="font-size:16px;font-weight:bold;color:#7ef7b8;">$9 900</div>
+          <div style="font-size:11px;color:#555;">$1 650/сотка · среднее $2 100</div>
+          <div style="font-size:10px;color:#7ef7b8;margin-top:4px;">-21.4% от среднего · stroka.kg</div>
+        </div>
+
+        <div style="text-align:center;margin-top:10px;">
+          <span style="font-size:11px;color:#7eb8f7;cursor:pointer;">Все 18 рекомендаций →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listings table -->
+    <div style="padding:0 14px 14px;background:#0d1520;">
+      <div style="background:#131f2e;border-radius:8px;padding:14px;">
+        <div style="font-size:13px;color:#aaa;margin-bottom:10px;">📋 Все объявления</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <tr style="color:#555;border-bottom:1px solid #1e2d3d;">
+            <th style="padding:8px;text-align:left;">Район</th>
+            <th style="padding:8px;text-align:left;">Площадь</th>
+            <th style="padding:8px;text-align:left;">Цена</th>
+            <th style="padding:8px;text-align:left;">$/сотка</th>
+            <th style="padding:8px;text-align:left;">Изменение</th>
+            <th style="padding:8px;text-align:left;">Источник</th>
+            <th style="padding:8px;text-align:left;">Дата</th>
+          </tr>
+          <tr style="border-bottom:1px solid #0d1520;color:#ccc;">
+            <td style="padding:8px;">Ленинский</td>
+            <td style="padding:8px;">8 сот.</td>
+            <td style="padding:8px;font-weight:bold;">$12 000</td>
+            <td style="padding:8px;">$1 500</td>
+            <td style="padding:8px;color:#f07e7e;">↓ -$500</td>
+            <td style="padding:8px;color:#7eb8f7;">house.kg</td>
+            <td style="padding:8px;color:#555;">28.05.2026</td>
+          </tr>
+          <tr style="border-bottom:1px solid #0d1520;color:#ccc;">
+            <td style="padding:8px;">Октябрьский</td>
+            <td style="padding:8px;">10 сот.</td>
+            <td style="padding:8px;font-weight:bold;">$22 000</td>
+            <td style="padding:8px;">$2 200</td>
+            <td style="padding:8px;color:#555;">— нет изм.</td>
+            <td style="padding:8px;color:#7eb8f7;">stroka.kg</td>
+            <td style="padding:8px;color:#555;">27.05.2026</td>
+          </tr>
+          <tr style="color:#ccc;">
+            <td style="padding:8px;">Свердловский</td>
+            <td style="padding:8px;">6 сот.</td>
+            <td style="padding:8px;font-weight:bold;">$11 400</td>
+            <td style="padding:8px;">$1 900</td>
+            <td style="padding:8px;color:#7ef7b8;">↑ +$400</td>
+            <td style="padding:8px;color:#7eb8f7;">lalafo.kg</td>
+            <td style="padding:8px;color:#555;">28.05.2026</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:16px;padding:12px;background:#1a1a2a;border-radius:8px;">
+  <p style="color:#aaa;margin:0;font-size:13px;">Такой макет дашборда подходит? Или что-то изменить в расположении блоков?</p>
+</div>

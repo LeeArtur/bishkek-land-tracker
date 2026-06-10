@@ -3,7 +3,7 @@ import re
 from datetime import date
 import httpx
 from bs4 import BeautifulSoup
-from scraper.base import ListingRaw, parse_price_usd
+from scraper.base import ListingRaw, parse_price_usd, parse_relative_date
 
 BASE_URL = "https://house.kg"
 # Bishkek land plots with красная книга (document=6), Chui region (region=1), Bishkek city (town=2)
@@ -78,6 +78,14 @@ def _parse_html(html: str) -> list[ListingRaw]:
 
             full_url = BASE_URL + href if href.startswith("/") else href
 
+            published_at = None
+            info_el = card.select_one(".additional-info, .left-side")
+            if info_el:
+                info_text = info_el.get_text(strip=True)
+                date_match = re.search(r'(\d*\s*(?:час|минут|секунд|день|дня|дней|недел|месяц|месяца|месяцев|год|года|лет)[а-я]*\s*назад)', info_text, re.IGNORECASE)
+                if date_match:
+                    published_at = parse_relative_date(date_match.group(1), today)
+
             results.append(ListingRaw(
                 external_id=f"{SOURCE}:{listing_id}",
                 source=SOURCE,
@@ -87,6 +95,7 @@ def _parse_html(html: str) -> list[ListingRaw]:
                 price_usd=price,
                 url=full_url,
                 scraped_at=today,
+                published_at=published_at,
             ))
         except Exception:
             continue

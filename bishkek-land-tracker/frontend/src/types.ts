@@ -42,6 +42,7 @@ export interface TrendPoint {
 export interface Deal extends Listing {
   median_price_per_sotka: number
   discount_pct: number
+  published_at: string | null
 }
 
 export interface MacroData {
