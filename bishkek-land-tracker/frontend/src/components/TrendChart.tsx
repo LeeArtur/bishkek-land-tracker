@@ -60,7 +60,7 @@ export function TrendChart() {
             <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
             <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 11 }} />
             <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={v => `$${v}`} />
-            <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, '']} contentStyle={{ background: '#111827', border: '1px solid #1e2d3d' }} />
+            <Tooltip formatter={(v) => [`$${Number(v).toLocaleString()}`, '']} contentStyle={{ background: '#111827', border: '1px solid #1e2d3d' }} />
             <Legend />
             {districts.map((d, i) => (
               <Line key={d} type="monotone" dataKey={d} stroke={COLORS[i % COLORS.length]} dot={false} strokeWidth={2} />
