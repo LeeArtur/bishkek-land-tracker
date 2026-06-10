@@ -78,14 +78,6 @@ def _parse_html(html: str) -> list[ListingRaw]:
 
             full_url = BASE_URL + href if href.startswith("/") else href
 
-            published_at = None
-            info_el = card.select_one(".additional-info, .left-side")
-            if info_el:
-                info_text = info_el.get_text(strip=True)
-                date_match = re.search(r'(\d*\s*(?:час|минут|секунд|день|дня|дней|недел|месяц|месяца|месяцев|год|года|лет)[а-я]*\s*назад)', info_text, re.IGNORECASE)
-                if date_match:
-                    published_at = parse_relative_date(date_match.group(1), today)
-
             results.append(ListingRaw(
                 external_id=f"{SOURCE}:{listing_id}",
                 source=SOURCE,
@@ -95,7 +87,6 @@ def _parse_html(html: str) -> list[ListingRaw]:
                 price_usd=price,
                 url=full_url,
                 scraped_at=today,
-                published_at=published_at,
             ))
         except Exception:
             continue
@@ -110,9 +101,26 @@ async def _fetch_page(client: httpx.AsyncClient, page_num: int) -> list[ListingR
     return _parse_html(r.text)
 
 
+async def _fetch_published_at(client: httpx.AsyncClient, listing: ListingRaw, sem: asyncio.Semaphore) -> ListingRaw:
+    """Fetch detail page to get the real publication date from added-span."""
+    async with sem:
+        try:
+            r = await client.get(listing.url, timeout=15)
+            soup = BeautifulSoup(r.text, "html.parser")
+            el = soup.select_one(".added-span")
+            if el:
+                text = el.get_text(strip=True)
+                match = re.search(r'Добавлено\s+(.+)', text, re.IGNORECASE)
+                if match:
+                    listing.published_at = parse_relative_date(match.group(1).strip(), listing.scraped_at)
+        except Exception:
+            pass
+    return listing
+
+
 async def _scrape_async() -> list[ListingRaw]:
-    # Step 1: fetch page 1 to check how many pages exist
     async with httpx.AsyncClient(headers=HEADERS, follow_redirects=True) as client:
+        # Step 1: collect all listings from search pages in parallel
         first_page = await _fetch_page(client, 1)
         if not first_page:
             return []
@@ -120,7 +128,6 @@ async def _scrape_async() -> list[ListingRaw]:
         results = list(first_page)
         print(f"house.kg page 1: +{len(first_page)} listings ({len(results)} total)")
 
-        # Step 2: fetch remaining pages in parallel batches
         semaphore = asyncio.Semaphore(CONCURRENCY)
 
         async def fetch_with_sem(page_num: int) -> tuple[int, list[ListingRaw]]:
@@ -131,8 +138,7 @@ async def _scrape_async() -> list[ListingRaw]:
         page_num = 2
         while page_num <= MAX_PAGES:
             batch = range(page_num, min(page_num + CONCURRENCY, MAX_PAGES + 1))
-            tasks = [fetch_with_sem(p) for p in batch]
-            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+            batch_results = await asyncio.gather(*[fetch_with_sem(p) for p in batch], return_exceptions=True)
 
             got_any = False
             for item in sorted(batch_results, key=lambda x: x[0] if isinstance(x, tuple) else 0):
@@ -149,7 +155,14 @@ async def _scrape_async() -> list[ListingRaw]:
                 break
             page_num += len(batch)
 
-    return results
+        # Step 2: fetch detail pages for published_at date in parallel
+        print(f"Fetching published dates for {len(results)} listings...")
+        detail_sem = asyncio.Semaphore(CONCURRENCY)
+        results = await asyncio.gather(*[_fetch_published_at(client, l, detail_sem) for l in results])
+        found = sum(1 for l in results if l.published_at)
+        print(f"Published dates found: {found}/{len(results)}")
+
+    return list(results)
 
 
 def scrape() -> list[ListingRaw]:
