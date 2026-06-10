@@ -35,7 +35,7 @@ function DealCard({ deal }: { deal: Deal }) {
         </div>
       </div>
 
-      <div className="text-xs text-gray-600 mt-2">{deal.published_at ?? deal.last_seen}</div>
+      <div className="text-xs text-gray-600 mt-2">Добавлено {deal.published_at ?? deal.last_seen}</div>
 
       <div className="mt-2 text-xs text-green-500 opacity-0 group-hover:opacity-100 transition-opacity">
         Открыть объявление →
