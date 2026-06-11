@@ -2,8 +2,8 @@ name: Nightly Scrape
 
 on:
   schedule:
-    - cron: '0 20 * * *'  # 03:00 Bishkek time (UTC+6) = 21:00 UTC, using 20:00 UTC as buffer
-  workflow_dispatch:        # allow manual trigger from GitHub UI
+    - cron: '0 20 * * *'  # 02:00 Bishkek time (UTC+6)
+  workflow_dispatch:
 
 jobs:
   scrape:
@@ -30,8 +30,4 @@ jobs:
       - name: Run scraper
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: python -c "
-from scheduler import run_nightly_scrape
-result = run_nightly_scrape()
-print('Result:', result)
-"
+        run: python run_scrape.py
