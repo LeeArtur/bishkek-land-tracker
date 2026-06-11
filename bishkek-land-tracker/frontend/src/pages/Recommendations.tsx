@@ -23,8 +23,11 @@ function DealCard({ deal }: { deal: Deal }) {
         <div className="text-white font-semibold text-lg leading-tight">
           ${deal.current_price_usd.toLocaleString()}
         </div>
-        <div className="text-gray-400 text-sm mt-0.5">
-          {deal.area_sotka} сот. · ${Math.round(deal.price_per_sotka).toLocaleString()}/сотка
+        <div className="text-blue-400 font-medium text-sm mt-1">
+          {deal.area_sotka} сот.
+        </div>
+        <div className="text-gray-500 text-xs mt-0.5">
+          ${Math.round(deal.price_per_sotka).toLocaleString()}/сотка
         </div>
       </div>
 
