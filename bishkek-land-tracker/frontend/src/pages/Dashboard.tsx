@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { SummaryCards } from '../components/SummaryCards'
 import { TrendChart } from '../components/TrendChart'
 import { DealsPanel } from '../components/DealsPanel'
-import { Filters } from '../components/Filters'
 import { api } from '../api/client'
 import type { MacroData } from '../types'
 
@@ -19,7 +18,6 @@ export function Dashboard() {
         </div>
       )}
       <SummaryCards />
-      <Filters />
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="min-w-0 lg:flex-[2]">
           <TrendChart />
